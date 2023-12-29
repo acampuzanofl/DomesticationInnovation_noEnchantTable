@@ -36,6 +36,8 @@ public class DIConfig {
     public final ForgeConfigSpec.DoubleValue blazingProtectionLootChance;
 
     private final Map<String, ForgeConfigSpec.BooleanValue> enabledEnchantments = new HashMap<>();
+    private final Map<String, ForgeConfigSpec.BooleanValue> lootOnlyEnchantments = new HashMap<>();
+
 
     public DIConfig(final ForgeConfigSpec.Builder builder) {
         builder.push("general");
@@ -77,6 +79,20 @@ public class DIConfig {
             throw new RuntimeException(e);
         }
         builder.pop();
+        builder.push("loot_only_enchantments");
+        try {
+            for (Field f : DIEnchantmentRegistry.class.getDeclaredFields()) {
+                Object obj = f.get(null);
+                if (obj instanceof PetEnchantment) {
+                    String registryName = ((PetEnchantment) obj).getName();
+                    String name = registryName + "_lootOnly";
+                    lootOnlyEnchantments.put(registryName, builder.comment("true if " + registryName.replace("_", " ") + " enchant is loot only, false if available at enchantment table").translation(name).define(name, true));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        builder.pop();
     }
 
     public boolean isEnchantEnabled(Enchantment enchantment){
@@ -85,6 +101,15 @@ public class DIConfig {
 
     public boolean isEnchantEnabled(String enchantment){
         ForgeConfigSpec.BooleanValue entry = enabledEnchantments.get(enchantment);
+        return entry == null || entry.get();
+    }
+
+    public boolean isEnchantLootOnly(Enchantment enchantment){
+        return enchantment instanceof PetEnchantment && isEnchantLootOnly(((PetEnchantment)enchantment).getName());
+    }
+
+    public boolean isEnchantLootOnly(String enchantment){
+        ForgeConfigSpec.BooleanValue entry = lootOnlyEnchantments.get(enchantment);
         return entry == null || entry.get();
     }
 }

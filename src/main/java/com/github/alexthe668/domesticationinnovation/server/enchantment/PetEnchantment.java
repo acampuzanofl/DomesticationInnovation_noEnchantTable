@@ -20,17 +20,38 @@ public class PetEnchantment extends Enchantment {
     }
 
     public int getMinCost(int i) {
-        return minXP + (i - 1) * minXP;
+        int minCost;
+        if ( DomesticationMod.CONFIG.isEnchantLootOnly(this)){
+            minCost = 25;
+        } else {
+            minCost = minXP + (i - 1) * minXP;
+        }
+        return minCost;
     }
 
     public int getMaxCost(int i) {
-        return super.getMinCost(i) + 5;
+                int maxCost;
+        if ( DomesticationMod.CONFIG.isEnchantLootOnly(this)){
+            maxCost = 50;
+        } else {
+            maxCost = super.getMinCost(i) + 5;
+        }
+        return maxCost;
     }
 
     public int getMaxLevel() {
-        return levels;
+        int maxLevel;
+        if ( DomesticationMod.CONFIG.isEnchantLootOnly(this)){
+            maxLevel = 1;
+        } else {
+            maxLevel = levels;
+        }
+        return maxLevel;
     }
-
+    
+    public boolean isTreasureOnly() {
+        return DomesticationMod.CONFIG.isEnchantLootOnly(this);
+    }
 
     protected boolean checkCompatibility(Enchantment enchantment) {
         return this != enchantment && DIEnchantmentRegistry.areCompatible(this, enchantment);
@@ -45,11 +66,11 @@ public class PetEnchantment extends Enchantment {
     }
 
     public boolean isAllowedOnBooks() {
-        return false;
+        return super.isAllowedOnBooks() && DomesticationMod.CONFIG.isEnchantEnabled(this);
     }
 
     public boolean canApplyAtEnchantingTable(ItemStack stack) {
-        return  false;
+        return super.canApplyAtEnchantingTable(stack) && DomesticationMod.CONFIG.isEnchantEnabled(this);
     }
 
     public String getName(){
